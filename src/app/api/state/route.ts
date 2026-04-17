@@ -50,7 +50,7 @@ const initCategories = () => {
         },
         {
             categoryName: "Хачи", questions: [
-                { price: 100, text: "О ком из кардиоцентра этот мем?", answer: "Зураб", imageUrl: "/placeholder-hachi.jpg", isPlayed: false, isCat: false },
+                { price: 100, text: "О ком из кардиоцентра этот мем?", answer: "Зураб", imageUrl: "/hachi100.jpg", isPlayed: false, isCat: false },
                 defaultPlaceholder("Кто из здесь присутствующих дрался с таксистом-хачом?", "Вася", 200),
                 defaultPlaceholder("Если пить чай, то с какой добавкой?", "Чабрец", 300),
                 defaultPlaceholder("Какому количеству хачей ваш покорный слуга писала диссертацию?", "Двум", 400),
