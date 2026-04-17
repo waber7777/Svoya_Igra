@@ -13,19 +13,37 @@ export interface GameState {
     buzzersEnabled: boolean;
 }
 
-const generateQuestions = (count: number = 5, catIndex: number = -1): Question[] => {
-    return Array.from({ length: count }).map((_, i) => ({ price: (i + 1) * 100, text: `Текст вопроса за ${(i + 1) * 100}...`, answer: "Правильный ответ", isPlayed: false, isCat: i === catIndex }));
+const generateQuestions = (count: number = 5): Question[] => {
+    return Array.from({ length: count }).map((_, i) => ({ price: (i + 1) * 100, text: `Текст вопроса за ${(i + 1) * 100}...`, answer: "Правильный ответ", isPlayed: false, isCat: false }));
 };
 
-const initCategories = () => [
-    { categoryName: "География", questions: generateQuestions(5, 2) }, // 300 очков Кот
-    { categoryName: "Панда", questions: generateQuestions() },
-    { categoryName: "Фильмы", questions: generateQuestions(5).map(q => ({ ...q, imageUrl: "/placeholder-movie.jpg" })) },
-    { categoryName: "Хачи", questions: generateQuestions(5).map((q, i) => i === 0 ? { ...q, imageUrl: "/placeholder-hachi.jpg" } : q) },
-    { categoryName: "Даренский", questions: generateQuestions() },
-    { categoryName: "Пиво", questions: generateQuestions(5, 4) }, // 500 очков Кот
-    { categoryName: "Угадай мелодию", questions: generateQuestions(5).map(q => ({ ...q, audioUrl: "/placeholder-song.mp3" })) }
-];
+const initCategories = () => {
+    const categories = [
+        { categoryName: "География", questions: generateQuestions() },
+        { categoryName: "Панда", questions: generateQuestions() },
+        { categoryName: "Фильмы", questions: generateQuestions().map(q => ({ ...q, imageUrl: "/placeholder-movie.jpg" })) },
+        { categoryName: "Хачи", questions: generateQuestions().map((q, i) => i === 0 ? { ...q, imageUrl: "/placeholder-hachi.jpg" } : q) },
+        { categoryName: "Даренский", questions: generateQuestions() },
+        { categoryName: "Пиво", questions: generateQuestions() },
+        { categoryName: "Угадай мелодию", questions: generateQuestions().map(q => ({ ...q, audioUrl: "/placeholder-song.mp3" })) }
+    ];
+
+    // По правилам "Своей Игры" в одном раунде обычно ровно 2 "Кота в мешке"
+    const totalCats = 2;
+    let placedCats = 0;
+
+    while (placedCats < totalCats) {
+        const randomCIndex = Math.floor(Math.random() * categories.length);
+        const randomQIndex = Math.floor(Math.random() * 5); // 5 вопросов в категории
+
+        if (!categories[randomCIndex].questions[randomQIndex].isCat) {
+            categories[randomCIndex].questions[randomQIndex].isCat = true;
+            placedCats++;
+        }
+    }
+
+    return categories;
+};
 
 let fallbackState: GameState = {
     categories: initCategories(),
