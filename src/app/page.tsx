@@ -4,20 +4,70 @@ import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { useGameState } from '@/hooks/useGameState';
 
+const playSheepSound = () => {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    const osc = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    const lfo = ctx.createOscillator();
+    const lfoGain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 1);
+
+    lfo.type = 'sine';
+    lfo.frequency.value = 8;
+    lfoGain.gain.value = 15;
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+
+    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+
+    osc.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    osc.start(ctx.currentTime);
+    lfo.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 1.2);
+    lfo.stop(ctx.currentTime + 1.2);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+};
+
 export default function Home() {
   const { state, sendAction } = useGameState();
   const [lastBuzzedId, setLastBuzzedId] = useState<string | null>(null);
+  const [isStarted, setIsStarted] = useState(false);
 
   useEffect(() => {
     if (state?.buzzedPlayerId && state.buzzedPlayerId !== lastBuzzedId) {
-      // Игрок нажал кнопку! Играем звук овцы
-      const audio = new Audio('/sheep.ogg');
-      audio.play().catch(e => console.error('Audio play failed:', e));
+      if (isStarted) {
+        playSheepSound();
+      }
       setLastBuzzedId(state.buzzedPlayerId);
     } else if (!state?.buzzedPlayerId && lastBuzzedId) {
       setLastBuzzedId(null);
     }
-  }, [state?.buzzedPlayerId, lastBuzzedId]);
+  }, [state?.buzzedPlayerId, lastBuzzedId, isStarted]);
+
+  if (!isStarted) {
+    return (
+      <main className={styles.main} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        <h1 style={{ fontSize: '4rem', color: '#ffd700', marginBottom: '3rem', textAlign: 'center', textShadow: '0 0 20px rgba(0,0,0,0.8)' }}>Игра готова! Экран зрителя</h1>
+        <button onClick={() => { playSheepSound(); setIsStarted(true); }} style={{ padding: '2rem 4rem', fontSize: '3rem', background: '#4caf50', color: 'white', borderRadius: '15px', border: '5px solid #2e7d32', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+          ▶️ СТАРТ (Включить звук)
+        </button>
+      </main>
+    );
+  }
 
   if (!state) return <div style={{ color: 'white', padding: '2rem', textAlign: 'center', fontSize: '2rem' }}>Загрузка состояния игры...</div>;
 
