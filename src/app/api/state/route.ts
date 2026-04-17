@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { kv } from '@vercel/kv';
+import { createClient } from 'redis';
 
 export interface Question { price: number; text: string; answer: string; isPlayed?: boolean; imageUrl?: string; audioUrl?: string; }
 export interface Category { categoryName: string; questions: Question[]; }
@@ -37,36 +37,51 @@ let fallbackState: GameState = {
 
 const KV_KEY = 'svoya_igra_state';
 
+let redisClient: any = null;
+
+async function getRedis() {
+    if (!process.env.KV_REDIS_URL) return null;
+    if (!redisClient) {
+        redisClient = createClient({ url: process.env.KV_REDIS_URL });
+        redisClient.on('error', (err: any) => console.error('Redis Client Error', err));
+        await redisClient.connect();
+    }
+    return redisClient;
+}
+
 async function getState(): Promise<GameState> {
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    const redis = await getRedis();
+    if (redis) {
         try {
-            const data = await kv.get<GameState>(KV_KEY);
-            if (data) {
-                console.log(`[kv-get] Успешно загружено. Игроков: ${Object.keys(data.players).length}`);
+            const dataStr = await redis.get(KV_KEY);
+            if (dataStr) {
+                const data = JSON.parse(dataStr) as GameState;
+                console.log(`[redis-get] Успешно загружено. Игроков: ${Object.keys(data.players).length}`);
                 return data;
             }
-            console.log("[kv-get] KV пуст! Создаю начальный стейт...");
+            console.log("[redis-get] Redis пуст! Создаю начальный стейт...");
             const initialState = {
                 categories: initCategories(), players: {}, activeQuestion: null, buzzedPlayerId: null, buzzersEnabled: false
             };
-            await kv.set(KV_KEY, initialState);
+            await redis.set(KV_KEY, JSON.stringify(initialState));
             return initialState;
         } catch (err) {
-            console.error("[kv-get] ОШИБКА чтения из базы Vercel KV:", err);
+            console.error("[redis-get] ОШИБКА чтения из Redis:", err);
         }
     } else {
-        console.error("[kv-get] ОШИБКА: Ключи KV_REST_API_URL не найдены в переменных окружения!");
+        console.error("[redis-get] ОШИБКА: Ключ KV_REDIS_URL не найден в переменных окружения!");
     }
-    return fallbackState; // local runtime fallback
+    return fallbackState;
 }
 
 async function saveState(state: GameState) {
-    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    const redis = await getRedis();
+    if (redis) {
         try {
-            await kv.set(KV_KEY, state);
-            console.log(`[kv-set] Сохранено. Игроков: ${Object.keys(state.players).length}`);
+            await redis.set(KV_KEY, JSON.stringify(state));
+            console.log(`[redis-set] Сохранено. Игроков: ${Object.keys(state.players).length}`);
         } catch (err) {
-            console.error("[kv-set] ОШИБКА записи в базу Vercel KV:", err);
+            console.error("[redis-set] ОШИБКА записи в Redis:", err);
         }
     } else {
         fallbackState = state;
