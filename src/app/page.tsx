@@ -6,37 +6,13 @@ import { useGameState } from '@/hooks/useGameState';
 
 const playSheepSound = () => {
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-
-    const osc = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(140, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 1);
-
-    lfo.type = 'sine';
-    lfo.frequency.value = 8;
-    lfoGain.gain.value = 15;
-
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
-
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
-
-    osc.connect(gainNode);
-    gainNode.connect(ctx.destination);
-
-    osc.start(ctx.currentTime);
-    lfo.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 1.2);
-    lfo.stop(ctx.currentTime + 1.2);
+    const sounds = [
+      "40a2fc37a6c6ef7.mp3", "72df0556a033e9b.mp3", "88dbbdd68ad525b.mp3",
+      "meeeeee-mayimbu.mp3", "sheep-baaa.mp3", "sheepbaa.mp3"
+    ];
+    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+    const audio = new Audio(`/Beee/${randomSound}`);
+    audio.play().catch(e => console.error("Audio error:", e));
   } catch (e) {
     console.error("Audio error:", e);
   }
