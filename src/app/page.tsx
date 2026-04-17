@@ -1,10 +1,23 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import styles from './page.module.css';
 import { useGameState } from '@/hooks/useGameState';
 
 export default function Home() {
   const { state, sendAction } = useGameState();
+  const [lastBuzzedId, setLastBuzzedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (state?.buzzedPlayerId && state.buzzedPlayerId !== lastBuzzedId) {
+      // Игрок нажал кнопку! Играем звук овцы
+      const audio = new Audio('/sheep.ogg');
+      audio.play().catch(e => console.error('Audio play failed:', e));
+      setLastBuzzedId(state.buzzedPlayerId);
+    } else if (!state?.buzzedPlayerId && lastBuzzedId) {
+      setLastBuzzedId(null);
+    }
+  }, [state?.buzzedPlayerId, lastBuzzedId]);
 
   if (!state) return <div style={{ color: 'white', padding: '2rem', textAlign: 'center', fontSize: '2rem' }}>Загрузка состояния игры...</div>;
 
