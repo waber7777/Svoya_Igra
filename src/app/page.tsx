@@ -97,29 +97,39 @@ export default function Home() {
       {activeQuestion && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h2 className={styles.questionPrice}>Вопрос за {activeQuestion.price}</h2>
-
-            {activeQuestion.imageUrl && (
-              <div className={styles.mediaContainer}>
-                <div>🖼️ Показ изображения ({activeQuestion.imageUrl})</div>
+            {state.activeQuestion?.isCat && !state.activeQuestion.isRevealed ? (
+              <div style={{ textAlign: 'center', padding: '5rem 0' }}>
+                <div style={{ fontSize: '8rem', color: '#ff2a2a', textShadow: '0 0 30px rgba(255,42,42,0.8)' }}>🐾</div>
+                <h2 style={{ fontSize: '5rem', color: '#ffed4a', margin: '2rem 0' }}>КОТ В МЕШКЕ!</h2>
+                <p style={{ fontSize: '2rem', color: '#fff' }}>Ведущий выставляет цену и отдает вопрос одному из игроков...</p>
               </div>
+            ) : (
+              <>
+                <h2 className={styles.questionPrice}>Вопрос за {state.activeQuestion?.catAssignedPrice || activeQuestion.price}</h2>
+
+                {activeQuestion.imageUrl && (
+                  <div className={styles.mediaContainer}>
+                    <div>🖼️ Показ изображения ({activeQuestion.imageUrl})</div>
+                  </div>
+                )}
+
+                {activeQuestion.audioUrl && (
+                  <div className={styles.mediaContainer}>
+                    <div>🎵 Воспроизведение трека ({activeQuestion.audioUrl})</div>
+                  </div>
+                )}
+
+                <p className={styles.questionText}>{activeQuestion.text}</p>
+
+                <div style={{ marginTop: '3rem', fontSize: '2rem', padding: '2rem', borderRadius: '15px', background: state.buzzersEnabled ? '#4caf50' : (state.buzzedPlayerId ? '#ff9800' : '#424242'), color: '#fff', fontWeight: 'bold', textShadow: '0 2px 5px rgba(0,0,0,0.5)', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
+                  {state.buzzersEnabled
+                    ? "⏳ ТАЙМЕР ИДЕТ! ИГРОКИ, ЖМИТЕ!"
+                    : state.buzzedPlayerId
+                      ? `🔔 ВНИМАНИЕ: ОТВЕЧАЕТ ${state.players[state.buzzedPlayerId]?.name.toUpperCase()}`
+                      : "ВЕДУЩИЙ ЧИТАЕТ ВОПРОС..."}
+                </div>
+              </>
             )}
-
-            {activeQuestion.audioUrl && (
-              <div className={styles.mediaContainer}>
-                <div>🎵 Воспроизведение трека ({activeQuestion.audioUrl})</div>
-              </div>
-            )}
-
-            <p className={styles.questionText}>{activeQuestion.text}</p>
-
-            <div style={{ marginTop: '3rem', fontSize: '2rem', padding: '2rem', borderRadius: '15px', background: state.buzzersEnabled ? '#4caf50' : (state.buzzedPlayerId ? '#ff9800' : '#424242'), color: '#fff', fontWeight: 'bold', textShadow: '0 2px 5px rgba(0,0,0,0.5)', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
-              {state.buzzersEnabled
-                ? "⏳ ТАЙМЕР ИДЕТ! ИГРОКИ, ЖМИТЕ!"
-                : state.buzzedPlayerId
-                  ? `🔔 ВНИМАНИЕ: ОТВЕЧАЕТ ${state.players[state.buzzedPlayerId]?.name.toUpperCase()}`
-                  : "ВЕДУЩИЙ ЧИТАЕТ ВОПРОС..."}
-            </div>
           </div>
         </div>
       )}

@@ -1,30 +1,30 @@
 import { NextResponse } from 'next/server';
 import { createClient } from 'redis';
 
-export interface Question { price: number; text: string; answer: string; isPlayed?: boolean; imageUrl?: string; audioUrl?: string; }
+export interface Question { price: number; text: string; answer: string; isPlayed?: boolean; imageUrl?: string; audioUrl?: string; isCat?: boolean; }
 export interface Category { categoryName: string; questions: Question[]; }
 export interface Player { id: string; name: string; score: number; }
 
 export interface GameState {
     categories: Category[];
     players: Record<string, Player>;
-    activeQuestion: { cIndex: number; qIndex: number } | null;
+    activeQuestion: { cIndex: number; qIndex: number; isCat?: boolean; isRevealed?: boolean; assignedPlayerId?: string; catAssignedPrice?: number } | null;
     buzzedPlayerId: string | null;
     buzzersEnabled: boolean;
 }
 
-const generateQuestions = (count: number = 5): Question[] => {
-    return Array.from({ length: count }).map((_, i) => ({ price: (i + 1) * 100, text: `Текст вопроса за ${(i + 1) * 100}...`, answer: "Правильный ответ", isPlayed: false, }));
+const generateQuestions = (count: number = 5, catIndex: number = -1): Question[] => {
+    return Array.from({ length: count }).map((_, i) => ({ price: (i + 1) * 100, text: `Текст вопроса за ${(i + 1) * 100}...`, answer: "Правильный ответ", isPlayed: false, isCat: i === catIndex }));
 };
 
 const initCategories = () => [
-    { categoryName: "География", questions: generateQuestions() },
+    { categoryName: "География", questions: generateQuestions(5, 2) }, // 300 очков Кот
     { categoryName: "Панда", questions: generateQuestions() },
-    { categoryName: "Фильмы", questions: generateQuestions().map(q => ({ ...q, imageUrl: "/placeholder-movie.jpg" })) },
-    { categoryName: "Хачи", questions: generateQuestions().map((q, i) => i === 0 ? { ...q, imageUrl: "/placeholder-hachi.jpg" } : q) },
+    { categoryName: "Фильмы", questions: generateQuestions(5).map(q => ({ ...q, imageUrl: "/placeholder-movie.jpg" })) },
+    { categoryName: "Хачи", questions: generateQuestions(5).map((q, i) => i === 0 ? { ...q, imageUrl: "/placeholder-hachi.jpg" } : q) },
     { categoryName: "Даренский", questions: generateQuestions() },
-    { categoryName: "Пиво", questions: generateQuestions() },
-    { categoryName: "Угадай мелодию", questions: generateQuestions().map(q => ({ ...q, audioUrl: "/placeholder-song.mp3" })) }
+    { categoryName: "Пиво", questions: generateQuestions(5, 4) }, // 500 очков Кот
+    { categoryName: "Угадай мелодию", questions: generateQuestions(5).map(q => ({ ...q, audioUrl: "/placeholder-song.mp3" })) }
 ];
 
 let fallbackState: GameState = {
@@ -36,7 +36,6 @@ let fallbackState: GameState = {
 };
 
 const KV_KEY = 'svoya_igra_state';
-
 let redisClient: any = null;
 
 async function getRedis() {
@@ -56,10 +55,8 @@ async function getState(): Promise<GameState> {
             const dataStr = await redis.get(KV_KEY);
             if (dataStr) {
                 const data = JSON.parse(dataStr) as GameState;
-                console.log(`[redis-get] Успешно загружено. Игроков: ${Object.keys(data.players).length}`);
                 return data;
             }
-            console.log("[redis-get] Redis пуст! Создаю начальный стейт...");
             const initialState = {
                 categories: initCategories(), players: {}, activeQuestion: null, buzzedPlayerId: null, buzzersEnabled: false
             };
@@ -68,8 +65,6 @@ async function getState(): Promise<GameState> {
         } catch (err) {
             console.error("[redis-get] ОШИБКА чтения из Redis:", err);
         }
-    } else {
-        console.error("[redis-get] ОШИБКА: Ключ KV_REDIS_URL не найден в переменных окружения!");
     }
     return fallbackState;
 }
@@ -79,7 +74,6 @@ async function saveState(state: GameState) {
     if (redis) {
         try {
             await redis.set(KV_KEY, JSON.stringify(state));
-            console.log(`[redis-set] Сохранено. Игроков: ${Object.keys(state.players).length}`);
         } catch (err) {
             console.error("[redis-set] ОШИБКА записи в Redis:", err);
         }
@@ -100,10 +94,25 @@ export async function POST(req: Request) {
                 }
                 break;
             case 'OPEN_QUESTION':
-                currentState.activeQuestion = { cIndex: payload.cIndex, qIndex: payload.qIndex };
+                const qInfo = currentState.categories[payload.cIndex].questions[payload.qIndex];
+                currentState.activeQuestion = {
+                    cIndex: payload.cIndex,
+                    qIndex: payload.qIndex,
+                    isCat: !!qInfo.isCat,
+                    isRevealed: !qInfo.isCat
+                };
                 currentState.categories[payload.cIndex].questions[payload.qIndex].isPlayed = true;
                 currentState.buzzedPlayerId = null;
                 currentState.buzzersEnabled = false;
+                break;
+            case 'ASSIGN_CAT':
+                if (currentState.activeQuestion && currentState.activeQuestion.isCat) {
+                    currentState.activeQuestion.assignedPlayerId = payload.playerId;
+                    currentState.activeQuestion.catAssignedPrice = payload.price;
+                    currentState.activeQuestion.isRevealed = true;
+                    currentState.buzzedPlayerId = payload.playerId;
+                    currentState.buzzersEnabled = false;
+                }
                 break;
             case 'ENABLE_BUZZERS':
                 currentState.buzzersEnabled = true;
