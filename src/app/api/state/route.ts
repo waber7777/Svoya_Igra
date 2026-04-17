@@ -39,22 +39,35 @@ const KV_KEY = 'svoya_igra_state';
 
 async function getState(): Promise<GameState> {
     if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-        const data = await kv.get<GameState>(KV_KEY);
-        if (data) return data;
-
-        // Initializing first time
-        const initialState = {
-            categories: initCategories(), players: {}, activeQuestion: null, buzzedPlayerId: null, buzzersEnabled: false
-        };
-        await kv.set(KV_KEY, initialState);
-        return initialState;
+        try {
+            const data = await kv.get<GameState>(KV_KEY);
+            if (data) {
+                console.log(`[kv-get] Успешно загружено. Игроков: ${Object.keys(data.players).length}`);
+                return data;
+            }
+            console.log("[kv-get] KV пуст! Создаю начальный стейт...");
+            const initialState = {
+                categories: initCategories(), players: {}, activeQuestion: null, buzzedPlayerId: null, buzzersEnabled: false
+            };
+            await kv.set(KV_KEY, initialState);
+            return initialState;
+        } catch (err) {
+            console.error("[kv-get] ОШИБКА чтения из базы Vercel KV:", err);
+        }
+    } else {
+        console.error("[kv-get] ОШИБКА: Ключи KV_REST_API_URL не найдены в переменных окружения!");
     }
     return fallbackState; // local runtime fallback
 }
 
 async function saveState(state: GameState) {
     if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
-        await kv.set(KV_KEY, state);
+        try {
+            await kv.set(KV_KEY, state);
+            console.log(`[kv-set] Сохранено. Игроков: ${Object.keys(state.players).length}`);
+        } catch (err) {
+            console.error("[kv-set] ОШИБКА записи в базу Vercel KV:", err);
+        }
     } else {
         fallbackState = state;
     }
