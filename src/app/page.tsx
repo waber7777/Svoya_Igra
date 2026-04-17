@@ -22,6 +22,43 @@ export default function Home() {
 
   const activeQuestion = state.activeQuestion ? state.categories[state.activeQuestion.cIndex].questions[state.activeQuestion.qIndex] : null;
 
+  const isGameFinished = state.categories.length > 0 && state.categories.every(cat => cat.questions.every(q => q.isPlayed));
+  const sortedPlayers = Object.values(state.players).sort((a, b) => b.score - a.score);
+  const winner = sortedPlayers.length > 0 ? sortedPlayers[0] : null;
+
+  if (isGameFinished) {
+    return (
+      <main className={styles.main} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+        <h1 style={{ fontSize: '5rem', color: '#ffd700', textShadow: '0 0 20px rgba(255, 215, 0, 0.8)', marginBottom: '2rem' }}>🎉 ИГРА ОКОНЧЕНА 🎉</h1>
+        {winner ? (
+          <div style={{ textAlign: 'center', background: '#042c7c', padding: '3rem 5rem', borderRadius: '20px', border: '5px solid #0b45b3', boxShadow: '0 10px 40px rgba(0,0,0,0.8)' }}>
+            <h2 style={{ fontSize: '3rem', color: 'white', marginBottom: '1rem' }}>АБСОЛЮТНЫЙ ПОБЕДИТЕЛЬ:</h2>
+            <div style={{ fontSize: '6rem', fontWeight: 'bold', color: '#ff2a2a', textShadow: '0 0 30px rgba(255, 42, 42, 0.8)' }}>
+              {winner.name.toUpperCase()}
+            </div>
+            <div style={{ fontSize: '3rem', color: '#ffd700', marginTop: '1rem', fontWeight: 'bold' }}>
+              Итоговый счет: {winner.score} очков
+            </div>
+          </div>
+        ) : (
+          <h2 style={{ fontSize: '3rem', color: 'white' }}>Нет победителя (Никто не присоединился)</h2>
+        )}
+
+        {sortedPlayers.length > 1 && (
+          <div style={{ marginTop: '4rem', width: '80%', maxWidth: '800px', background: 'rgba(0,0,0,0.5)', padding: '2rem', borderRadius: '15px' }}>
+            <h3 style={{ fontSize: '2rem', color: '#aaa', textAlign: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #555', paddingBottom: '1rem' }}>Таблица результатов:</h3>
+            {sortedPlayers.map((p, index) => (
+              <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.5rem', marginBottom: '1rem', color: index === 0 ? '#ffd700' : 'white' }}>
+                <span>{index + 1}. {p.name}</span>
+                <span style={{ fontWeight: 'bold' }}>{p.score}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    );
+  }
+
   return (
     <main className={styles.main}>
       <div className={styles.header}>
