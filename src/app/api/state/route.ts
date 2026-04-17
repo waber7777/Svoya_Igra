@@ -64,8 +64,14 @@ export async function POST(req: Request) {
                 if (globalState.players[payload.playerId]) {
                     globalState.players[payload.playerId].score += payload.points;
                 }
-                globalState.buzzedPlayerId = null;
-                globalState.buzzersEnabled = true;
+                if (payload.points > 0) {
+                    globalState.activeQuestion = null;
+                    globalState.buzzedPlayerId = null;
+                    globalState.buzzersEnabled = false;
+                } else {
+                    globalState.buzzedPlayerId = null;
+                    globalState.buzzersEnabled = true;
+                }
                 break;
             case 'CLOSE_QUESTION':
                 globalState.activeQuestion = null;
