@@ -144,11 +144,13 @@ export default function Home() {
               </div>
             ) : (
               <>
-                <h2 className={styles.questionPrice}>Вопрос за {state.activeQuestion?.catAssignedPrice || activeQuestion.price}</h2>
+                <h2 className={styles.questionPrice} style={{ marginBottom: activeQuestion.imageUrl ? '0.5rem' : '2rem' }}>
+                  Вопрос за {state.activeQuestion?.catAssignedPrice || activeQuestion.price}
+                </h2>
 
                 {activeQuestion.imageUrl && (
-                  <div className={styles.mediaContainer} style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                    <img src={activeQuestion.imageUrl} alt="Изображение к вопросу" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', border: '2px solid #fff' }} />
+                  <div className={styles.mediaContainer} style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+                    <img src={activeQuestion.imageUrl} alt="Изображение к вопросу" style={{ maxWidth: '100%', maxHeight: '42vh', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', border: '2px solid #fff' }} />
                   </div>
                 )}
 
@@ -158,9 +160,11 @@ export default function Home() {
                   </div>
                 )}
 
-                <p className={styles.questionText}>{activeQuestion.text}</p>
+                <p className={styles.questionText} style={activeQuestion.imageUrl ? { fontSize: '1.8rem', lineHeight: '1.2', margin: '0.5rem 0' } : {}}>
+                  {activeQuestion.text}
+                </p>
 
-                <div style={{ marginTop: '3rem', fontSize: '2rem', padding: '2rem', borderRadius: '15px', background: state.buzzersEnabled ? '#4caf50' : (state.buzzedPlayerId ? '#ff9800' : '#424242'), color: '#fff', fontWeight: 'bold', textShadow: '0 2px 5px rgba(0,0,0,0.5)', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
+                <div style={{ marginTop: activeQuestion.imageUrl ? '1rem' : '3rem', fontSize: activeQuestion.imageUrl ? '1.5rem' : '2rem', padding: activeQuestion.imageUrl ? '1rem' : '2rem', borderRadius: '15px', background: state.buzzersEnabled ? '#4caf50' : (state.buzzedPlayerId ? '#ff9800' : '#424242'), color: '#fff', fontWeight: 'bold', textShadow: '0 2px 5px rgba(0,0,0,0.5)', boxShadow: '0 4px 15px rgba(0,0,0,0.5)' }}>
                   {state.buzzersEnabled
                     ? "⏳ ТАЙМЕР ИДЕТ! ИГРОКИ, ЖМИТЕ!"
                     : state.buzzedPlayerId
@@ -169,7 +173,7 @@ export default function Home() {
                 </div>
 
                 {state.activeQuestion?.showAnswer && (
-                  <div style={{ marginTop: '2rem', fontSize: '2.5rem', color: '#fff', padding: '1.5rem', border: '3px solid #ffed4a', borderRadius: '15px', background: '#e65100', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', fontWeight: 'bold' }}>
+                  <div style={{ marginTop: activeQuestion.imageUrl ? '0.5rem' : '2rem', fontSize: activeQuestion.imageUrl ? '1.8rem' : '2.5rem', color: '#fff', padding: activeQuestion.imageUrl ? '0.8rem' : '1.5rem', border: '3px solid #ffed4a', borderRadius: '15px', background: '#e65100', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', fontWeight: 'bold' }}>
                     👑 ОТВЕТ: {activeQuestion.answer}
                   </div>
                 )}
