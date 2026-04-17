@@ -115,8 +115,9 @@ export default function AdminPage() {
                                 </div>
                             )}
 
-                            <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-                                <button onClick={() => sendAction('CLOSE_QUESTION')} style={{ padding: '0.8rem 1rem', width: '100%', background: '#757575', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem' }}>Вернуть вопрос в табло (без ответа)</button>
+                            <div style={{ marginTop: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <button onClick={() => sendAction('SHOW_ANSWER')} style={{ padding: '0.8rem 1rem', width: '100%', background: '#9c27b0', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', boxShadow: '0 4px 6px rgba(156, 39, 176, 0.4)' }}>Раскрыть правильный ответ на экране всем</button>
+                                <button onClick={() => sendAction('CLOSE_QUESTION')} style={{ padding: '0.8rem 1rem', width: '100%', background: '#757575', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem' }}>Вернуть вопрос в табло (закрыть)</button>
                             </div>
                         </>
                     )}

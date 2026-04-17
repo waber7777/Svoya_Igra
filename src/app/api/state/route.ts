@@ -8,7 +8,7 @@ export interface Player { id: string; name: string; score: number; }
 export interface GameState {
     categories: Category[];
     players: Record<string, Player>;
-    activeQuestion: { cIndex: number; qIndex: number; isCat?: boolean; isRevealed?: boolean; assignedPlayerId?: string; catAssignedPrice?: number } | null;
+    activeQuestion: { cIndex: number; qIndex: number; isCat?: boolean; isRevealed?: boolean; assignedPlayerId?: string; catAssignedPrice?: number; showAnswer?: boolean } | null;
     buzzedPlayerId: string | null;
     buzzersEnabled: boolean;
 }
@@ -18,30 +18,84 @@ const generateQuestions = (count: number = 5): Question[] => {
 };
 
 const initCategories = () => {
+    const defaultPlaceholder = (text: string, answer: string, price: number) => ({ price, text, answer, isPlayed: false, isCat: false });
+
     const categories = [
-        { categoryName: "География", questions: generateQuestions() },
-        { categoryName: "Панда", questions: generateQuestions() },
-        { categoryName: "Фильмы", questions: generateQuestions().map(q => ({ ...q, imageUrl: "/placeholder-movie.jpg" })) },
-        { categoryName: "Хачи", questions: generateQuestions().map((q, i) => i === 0 ? { ...q, imageUrl: "/placeholder-hachi.jpg" } : q) },
-        { categoryName: "Даренский", questions: generateQuestions() },
-        { categoryName: "Пиво", questions: generateQuestions() },
-        { categoryName: "Угадай мелодию", questions: generateQuestions().map(q => ({ ...q, audioUrl: "/placeholder-song.mp3" })) }
+        {
+            categoryName: "География", questions: [
+                defaultPlaceholder("Цветок-символ Калмыкии, цветущий в степи весной", "Тюльпан", 100),
+                defaultPlaceholder("Какое озеро называют жемчужиной Тянь-Шаня?", "Иссык-Куль", 200),
+                defaultPlaceholder("В каком городе родился Зураб Церетели?", "Тбилиси", 300),
+                defaultPlaceholder("Какой знаменитый царь после взятия Казани в 1552 году начал присоединять Марийский Край к Российскому государству?", "Иван Грозный", 400),
+                defaultPlaceholder("Кто архитектор центра Гейдара Алиева в Баку?", "Заха Хадид", 500)
+            ]
+        },
+        {
+            categoryName: "Панда", questions: [
+                defaultPlaceholder("Сколько должно стоить помолвочное кольцо?", "Три зарплаты", 100),
+                defaultPlaceholder("Выберите лишнее: выть, спорт, батониться", "Спорт", 200),
+                defaultPlaceholder("Как хотели назвать Риту?", "Лера", 300),
+                defaultPlaceholder("Какие кости Рита сломала на шашлыках в 2023 году?", "Таранную и фалангу пальца", 400),
+                defaultPlaceholder("Какой Ритин любимый музей?", "Музей естественной истории в Лондоне", 500)
+            ]
+        },
+        {
+            categoryName: "Фильмы", questions: [
+                { price: 100, text: "Угадайте, из какого фильма этот кадр", answer: "Гарри Поттер", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
+                { price: 200, text: "Угадайте, из какого фильма этот кадр", answer: "Ирония судьбы, или С легким паром", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
+                { price: 300, text: "Угадайте, из какого фильма этот кадр", answer: "Кавказская пленница", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
+                { price: 400, text: "Угадайте, из какого фильма этот кадр", answer: "Как я встретил вашу маму", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
+                { price: 500, text: "Угадайте, из какого фильма этот кадр", answer: "Москва слезам не верит", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false }
+            ]
+        },
+        {
+            categoryName: "Хачи", questions: [
+                { price: 100, text: "О ком из кардиоцентра этот мем?", answer: "Зураб", imageUrl: "/placeholder-hachi.jpg", isPlayed: false, isCat: false },
+                defaultPlaceholder("Кто из здесь присутствующих дрался с таксистом-хачом?", "Участник игры (пусть признается!)", 200),
+                defaultPlaceholder("Если пить чай, то с какой добавкой?", "Чабрец", 300),
+                defaultPlaceholder("Какому количеству хачей ваш покорный слуга писала диссертацию?", "Двум", 400),
+                defaultPlaceholder("Выберите лишнее: Дубай, Япония, Стамбул, Саудовская Аравия, Норвегия", "Норвегия", 500)
+            ]
+        },
+        {
+            categoryName: "Даренский", questions: [
+                defaultPlaceholder("Продолжите фразу: мда…", "Так и знал", 100),
+                defaultPlaceholder("Какая любимая социальная сеть у Дмитрий Ивановича?", "ВКонтакте", 200),
+                defaultPlaceholder("Выберите лишнее: трипликсам, брилинта", "Брилинта", 300),
+                defaultPlaceholder("О каком предмете идет речь? Новый, большой, складной…", "Мат", 400),
+                defaultPlaceholder("Про кого была сказана фраза «О! Я вот как знал, где вас искать, там, где еда и диван»", "Про Сашу", 500)
+            ]
+        },
+        {
+            categoryName: "Пиво", questions: [
+                defaultPlaceholder("Какой мой любимый вид пива?", "Светлое нефильтрованное", 100),
+                defaultPlaceholder("Какая страна считается мировым лидером по потреблению пива на душу населения?", "Чехия", 200),
+                defaultPlaceholder("В какой европейской столице находится музей пива «Heineken Experience»?", "Амстердам", 300),
+                defaultPlaceholder("Предположите, сколько градусов в самом крепком пиве, которое внесено в книгу рекордов Гиннеса?", "67,5% - это пиво Snake Venom", 400),
+                defaultPlaceholder("Какие учреждения/заведения были ключевыми в истории европейского пивоварения?", "Монастыри (правило Ora et labora)", 500)
+            ]
+        },
+        {
+            categoryName: "Угадай мелодию", questions: [
+                { price: 100, text: "Угадайте мелодию:", answer: "La isla bonita", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
+                { price: 200, text: "Угадайте мелодию:", answer: "Иностранец", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
+                { price: 300, text: "Угадайте мелодию:", answer: "Яхта парус", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
+                { price: 400, text: "Угадайте мелодию:", answer: "Big in Japan (Альфавилль)", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
+                { price: 500, text: "Угадайте мелодию:", answer: "До скорой встречи", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false }
+            ]
+        }
     ];
 
-    // По правилам "Своей Игры" в одном раунде обычно ровно 2 "Кота в мешке"
     const totalCats = 2;
     let placedCats = 0;
-
     while (placedCats < totalCats) {
         const randomCIndex = Math.floor(Math.random() * categories.length);
-        const randomQIndex = Math.floor(Math.random() * 5); // 5 вопросов в категории
-
+        const randomQIndex = Math.floor(Math.random() * 5);
         if (!categories[randomCIndex].questions[randomQIndex].isCat) {
             categories[randomCIndex].questions[randomQIndex].isCat = true;
             placedCats++;
         }
     }
-
     return categories;
 };
 
@@ -132,6 +186,14 @@ export async function POST(req: Request) {
                     currentState.buzzersEnabled = false;
                 }
                 break;
+            case 'SHOW_ANSWER':
+                if (currentState.activeQuestion) {
+                    currentState.activeQuestion.showAnswer = true;
+                    // Очищаем текущего отвечающего, так как играем просто ответ
+                    currentState.buzzedPlayerId = null;
+                    currentState.buzzersEnabled = false;
+                }
+                break;
             case 'ENABLE_BUZZERS':
                 currentState.buzzersEnabled = true;
                 currentState.buzzedPlayerId = null;
@@ -147,7 +209,10 @@ export async function POST(req: Request) {
                     currentState.players[payload.playerId].score += payload.points;
                 }
                 if (payload.points > 0) {
-                    currentState.activeQuestion = null;
+                    // При правильном ответе открываем ответ на экране всем, а не закрываем вопрос
+                    if (currentState.activeQuestion) {
+                        currentState.activeQuestion.showAnswer = true;
+                    }
                     currentState.buzzedPlayerId = null;
                     currentState.buzzersEnabled = false;
                 } else {

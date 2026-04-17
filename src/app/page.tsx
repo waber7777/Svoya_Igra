@@ -167,6 +167,12 @@ export default function Home() {
                       ? `🔔 ВНИМАНИЕ: ОТВЕЧАЕТ ${state.players[state.buzzedPlayerId]?.name.toUpperCase()}`
                       : "ВЕДУЩИЙ ЧИТАЕТ ВОПРОС..."}
                 </div>
+
+                {state.activeQuestion?.showAnswer && (
+                  <div style={{ marginTop: '2rem', fontSize: '2.5rem', color: '#fff', padding: '1.5rem', border: '3px solid #ffed4a', borderRadius: '15px', background: '#e65100', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', fontWeight: 'bold' }}>
+                    👑 ОТВЕТ: {activeQuestion.answer}
+                  </div>
+                )}
               </>
             )}
           </div>
