@@ -149,8 +149,8 @@ export default function Home() {
                 </h2>
 
                 {activeQuestion.imageUrl && (
-                  <div className={styles.mediaContainer} style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
-                    <img src={activeQuestion.imageUrl} alt="Изображение к вопросу" style={{ maxWidth: '100%', maxHeight: '42vh', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', border: '2px solid #fff' }} />
+                  <div className={styles.mediaContainer} style={{ textAlign: 'center', marginBottom: '0.2rem' }}>
+                    <img src={activeQuestion.imageUrl} alt="Изображение к вопросу" style={{ maxWidth: '100%', maxHeight: '35vh', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', border: '2px solid #fff' }} />
                   </div>
                 )}
 
