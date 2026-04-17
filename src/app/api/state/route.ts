@@ -41,11 +41,11 @@ const initCategories = () => {
         },
         {
             categoryName: "Фильмы", questions: [
-                { price: 100, text: "Угадайте, из какого фильма этот кадр", answer: "Гарри Поттер", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
-                { price: 200, text: "Угадайте, из какого фильма этот кадр", answer: "Ирония судьбы, или С легким паром", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
-                { price: 300, text: "Угадайте, из какого фильма этот кадр", answer: "Кавказская пленница", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
-                { price: 400, text: "Угадайте, из какого фильма этот кадр", answer: "Как я встретил вашу маму", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false },
-                { price: 500, text: "Угадайте, из какого фильма этот кадр", answer: "Москва слезам не верит", imageUrl: "/placeholder-movie.jpg", isPlayed: false, isCat: false }
+                { price: 100, text: "Угадайте, из какого фильма этот кадр", answer: "Гарри Поттер", imageUrl: "/movie100.jpg", isPlayed: false, isCat: false },
+                { price: 200, text: "Угадайте, из какого фильма этот кадр", answer: "Ирония судьбы, или С легким паром", imageUrl: "/movie200.jpg", isPlayed: false, isCat: false },
+                { price: 300, text: "Угадайте, из какого фильма этот кадр", answer: "Кавказская пленница", imageUrl: "/movie300.jpg", isPlayed: false, isCat: false },
+                { price: 400, text: "Угадайте, из какого фильма этот кадр", answer: "Как я встретил вашу маму", imageUrl: "/movie400.jpg", isPlayed: false, isCat: false },
+                { price: 500, text: "Угадайте, из какого фильма этот кадр", answer: "Москва слезам не верит", imageUrl: "/movie500.jpg", isPlayed: false, isCat: false }
             ]
         },
         {
