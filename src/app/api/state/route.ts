@@ -77,11 +77,11 @@ const initCategories = () => {
         },
         {
             categoryName: "Угадай мелодию", questions: [
-                { price: 100, text: "Угадайте мелодию:", answer: "La isla bonita", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
-                { price: 200, text: "Угадайте мелодию:", answer: "Иностранец", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
-                { price: 300, text: "Угадайте мелодию:", answer: "Яхта парус", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
-                { price: 400, text: "Угадайте мелодию:", answer: "Big in Japan (Альфавилль)", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false },
-                { price: 500, text: "Угадайте мелодию:", answer: "До скорой встречи", audioUrl: "/placeholder-song.mp3", isPlayed: false, isCat: false }
+                { price: 100, text: "Угадайте мелодию:", answer: "La isla bonita", audioUrl: "/music/song100.mp3", isPlayed: false, isCat: false },
+                { price: 200, text: "Угадайте мелодию:", answer: "Иностранец", audioUrl: "/music/song200.mp3", isPlayed: false, isCat: false },
+                { price: 300, text: "Угадайте мелодию:", answer: "Яхта парус", audioUrl: "/music/song300.mp3", isPlayed: false, isCat: false },
+                { price: 400, text: "Угадайте мелодию:", answer: "Big in Japan (Альфавилль)", audioUrl: "/music/song400.mp3", isPlayed: false, isCat: false },
+                { price: 500, text: "Угадайте мелодию:", answer: "До скорой встречи", audioUrl: "/music/song500.mp3", isPlayed: false, isCat: false }
             ]
         }
     ];
