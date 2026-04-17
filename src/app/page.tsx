@@ -147,14 +147,14 @@ export default function Home() {
                 <h2 className={styles.questionPrice}>Вопрос за {state.activeQuestion?.catAssignedPrice || activeQuestion.price}</h2>
 
                 {activeQuestion.imageUrl && (
-                  <div className={styles.mediaContainer}>
-                    <div>🖼️ Показ изображения ({activeQuestion.imageUrl})</div>
+                  <div className={styles.mediaContainer} style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                    <img src={activeQuestion.imageUrl} alt="Изображение к вопросу" style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '10px', boxShadow: '0 4px 10px rgba(0,0,0,0.5)', border: '2px solid #fff' }} />
                   </div>
                 )}
 
                 {activeQuestion.audioUrl && (
-                  <div className={styles.mediaContainer}>
-                    <div>🎵 Воспроизведение трека ({activeQuestion.audioUrl})</div>
+                  <div className={styles.mediaContainer} style={{ textAlign: 'center', marginBottom: '1rem' }}>
+                    <audio src={activeQuestion.audioUrl} controls autoPlay style={{ width: '100%', maxWidth: '400px' }} />
                   </div>
                 )}
 
