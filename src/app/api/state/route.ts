@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { kv } from '@vercel/kv';
 
 export interface Question { price: number; text: string; answer: string; isPlayed?: boolean; imageUrl?: string; audioUrl?: string; }
 export interface Category { categoryName: string; questions: Question[]; }
@@ -26,7 +27,7 @@ const initCategories = () => [
     { categoryName: "Угадай мелодию", questions: generateQuestions().map(q => ({ ...q, audioUrl: "/placeholder-song.mp3" })) }
 ];
 
-let globalState: GameState = {
+let fallbackState: GameState = {
     categories: initCategories(),
     players: {},
     activeQuestion: null,
@@ -34,64 +35,93 @@ let globalState: GameState = {
     buzzersEnabled: false
 };
 
+const KV_KEY = 'svoya_igra_state';
+
+async function getState(): Promise<GameState> {
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        const data = await kv.get<GameState>(KV_KEY);
+        if (data) return data;
+
+        // Initializing first time
+        const initialState = {
+            categories: initCategories(), players: {}, activeQuestion: null, buzzedPlayerId: null, buzzersEnabled: false
+        };
+        await kv.set(KV_KEY, initialState);
+        return initialState;
+    }
+    return fallbackState; // local runtime fallback
+}
+
+async function saveState(state: GameState) {
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+        await kv.set(KV_KEY, state);
+    } else {
+        fallbackState = state;
+    }
+}
+
 export async function POST(req: Request) {
     try {
         const { action, payload } = await req.json();
+        const currentState = await getState();
 
         switch (action) {
             case 'JOIN':
-                if (!globalState.players[payload.id]) {
-                    globalState.players[payload.id] = { id: payload.id, name: payload.name, score: 0 };
+                if (!currentState.players[payload.id]) {
+                    currentState.players[payload.id] = { id: payload.id, name: payload.name, score: 0 };
                 }
                 break;
             case 'OPEN_QUESTION':
-                globalState.activeQuestion = { cIndex: payload.cIndex, qIndex: payload.qIndex };
-                globalState.categories[payload.cIndex].questions[payload.qIndex].isPlayed = true;
-                globalState.buzzedPlayerId = null;
-                globalState.buzzersEnabled = false;
+                currentState.activeQuestion = { cIndex: payload.cIndex, qIndex: payload.qIndex };
+                currentState.categories[payload.cIndex].questions[payload.qIndex].isPlayed = true;
+                currentState.buzzedPlayerId = null;
+                currentState.buzzersEnabled = false;
                 break;
             case 'ENABLE_BUZZERS':
-                globalState.buzzersEnabled = true;
-                globalState.buzzedPlayerId = null;
+                currentState.buzzersEnabled = true;
+                currentState.buzzedPlayerId = null;
                 break;
             case 'BUZZ':
-                if (globalState.buzzersEnabled && !globalState.buzzedPlayerId) {
-                    globalState.buzzedPlayerId = payload.playerId;
-                    globalState.buzzersEnabled = false;
+                if (currentState.buzzersEnabled && !currentState.buzzedPlayerId) {
+                    currentState.buzzedPlayerId = payload.playerId;
+                    currentState.buzzersEnabled = false;
                 }
                 break;
             case 'AWARD_POINTS':
-                if (globalState.players[payload.playerId]) {
-                    globalState.players[payload.playerId].score += payload.points;
+                if (currentState.players[payload.playerId]) {
+                    currentState.players[payload.playerId].score += payload.points;
                 }
                 if (payload.points > 0) {
-                    globalState.activeQuestion = null;
-                    globalState.buzzedPlayerId = null;
-                    globalState.buzzersEnabled = false;
+                    currentState.activeQuestion = null;
+                    currentState.buzzedPlayerId = null;
+                    currentState.buzzersEnabled = false;
                 } else {
-                    globalState.buzzedPlayerId = null;
-                    globalState.buzzersEnabled = true;
+                    currentState.buzzedPlayerId = null;
+                    currentState.buzzersEnabled = true;
                 }
                 break;
             case 'CLOSE_QUESTION':
-                globalState.activeQuestion = null;
-                globalState.buzzedPlayerId = null;
-                globalState.buzzersEnabled = false;
+                currentState.activeQuestion = null;
+                currentState.buzzedPlayerId = null;
+                currentState.buzzersEnabled = false;
                 break;
             case 'RESET_GAME':
-                globalState.categories = initCategories();
-                globalState.players = {};
-                globalState.activeQuestion = null;
-                globalState.buzzedPlayerId = null;
-                globalState.buzzersEnabled = false;
+                currentState.categories = initCategories();
+                currentState.players = {};
+                currentState.activeQuestion = null;
+                currentState.buzzedPlayerId = null;
+                currentState.buzzersEnabled = false;
                 break;
         }
-        return NextResponse.json(globalState);
+
+        await saveState(currentState);
+        return NextResponse.json(currentState);
     } catch (e) {
         return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
 }
 
 export async function GET() {
-    return NextResponse.json(globalState);
+    const currentState = await getState();
+    return NextResponse.json(currentState);
 }
